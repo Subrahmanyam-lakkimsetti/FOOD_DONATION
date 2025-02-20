@@ -8,7 +8,7 @@ const HomePage = ({ User, handleLogout }) => {
   return (
     <>
       <NavBar User={User} handleLogout={handleLogout} />
-      <MainSection />
+      <MainSection User={User} />
       <HowItWorks />
       <h1>Hello</h1>
     </>

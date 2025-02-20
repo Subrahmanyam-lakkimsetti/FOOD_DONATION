@@ -183,7 +183,7 @@ app.post('/users/login', async (req, res) => {
       return;
     }
 
-    const { password: newpassword, name, _id } = userExists;
+    const { password: newpassword, name, _id, role } = userExists;
 
     const verifiedPassword = await bcrypt.compare(password, newpassword);
 
@@ -200,6 +200,7 @@ app.post('/users/login', async (req, res) => {
         email,
         id: _id,
         name,
+        role,
       },
       process.env.JWT_SECRET_KEY,
       {
@@ -286,12 +287,14 @@ const authorizationMiddleWare = (req, res, next) => {
 
 app.get('/users/me', authorizationMiddleWare, (req, res) => {
   try {
-    const { email, name } = req.user;
+    console.log('req user:', req.user);
+    const { email, name, role } = req.user;
     res.status(200).json({
       status: 'success',
       data: {
         email,
         name,
+        role,
       },
     });
   } catch (error) {
@@ -369,8 +372,8 @@ app.put('/request/:foodId', authorizationMiddleWare, async (req, res) => {
   try {
     const updatedFood = await Food.findByIdAndUpdate(
       req.params.foodId,
-      { status: 'Requested' }, // Update only the status field
-      { new: true, runValidators: false } // Prevent validation errors
+      { status: 'Requested' },
+      { new: true, runValidators: false }
     );
 
     if (!updatedFood) {
@@ -413,6 +416,30 @@ app.put('/pickup/:foodId', authorizationMiddleWare, async (req, res) => {
   }
 });
 
+app.get('/donor/food', authorizationMiddleWare, async (req, res) => {
+  try {
+    console.log('User Email from Auth Middleware:', req.user?.email);
+
+    if (!req.user || !req.user.email) {
+      return res
+        .status(401)
+        .json({ message: 'Unauthorized: User email missing' });
+    }
+
+    const donatedFood = await Food.find({ donorEmail: req.user.email });
+
+    console.log(donatedFood);
+
+    if (!donatedFood.length) {
+      return res.json({ message: 'No donations found', donatedFood: [] });
+    }
+
+    res.json({ donatedFood });
+  } catch (error) {
+    console.error('Error fetching donor food:', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

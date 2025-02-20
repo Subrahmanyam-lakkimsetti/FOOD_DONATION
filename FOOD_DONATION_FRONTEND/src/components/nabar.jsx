@@ -19,13 +19,21 @@ const NavBar = ({ User, handleLogout }) => {
           <Link to={'/'} className="link">
             <li>Home</li>
           </Link>
-          <li>About</li>
+          {User.isLoggedin ? (
+            <>
+              <Link to="/donorDashboard" className="link">
+                <li className="yourdonation">Your Donation</li>
+              </Link>
+            </>
+          ) : (
+            ''
+          )}
+
           <a href="#footer" className="link-about">
             <li>About</li>
           </a>
           {User.isLoggedin ? (
             <>
-              <span className="welcome">Welcome, {User.name}!</span>
               <button className="auth" onClick={handleLogout}>
                 Logout
               </button>

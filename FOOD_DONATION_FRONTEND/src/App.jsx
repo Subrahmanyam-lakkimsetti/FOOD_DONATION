@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import cookie from 'js-cookie';
 import DonateFood from '../src/components/Donatefood';
 import AvailableFoodList from './components/AvailableFood';
+import DonorDashboard from './components/DonarContribution';
 const App = () => {
   const [User, setUser] = useState(() => {
     const isLoggedin = localStorage.getItem('isLoggedIn');
@@ -44,6 +45,7 @@ const App = () => {
           isLoggedin: true,
           email: respObj.data.email,
           name: respObj.data.name,
+          role: respObj.data.role,
         });
       }
     } catch (error) {
@@ -92,10 +94,10 @@ const App = () => {
           localStorage.removeItem('isLoggedIn');
           setUser({ isLoggedin: false, name: 'User' });
         }
-        return; // Avoid calling logout repeatedly
+        return;
       }
 
-      setTimeout(verifyToken, 200); // Only check again if a token was found
+      setTimeout(verifyToken, 200);
     };
 
     verifyToken();
@@ -147,6 +149,11 @@ const App = () => {
             element={
               <AvailableFoodList User={User} handleLogout={handleLogout} />
             }
+          />
+
+          <Route
+            path="/donorDashboard"
+            element={<DonorDashboard User={User} handleLogout={handleLogout} />}
           />
         </Routes>
       </BrowserRouter>
