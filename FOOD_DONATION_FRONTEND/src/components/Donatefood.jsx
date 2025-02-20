@@ -24,12 +24,15 @@ const FoodDonationForm = ({ User, handleLogout }) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:5000/donate', {
-        method: 'POST',
-        credentials: 'include', // Sends authentication cookies
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + '/donate',
+        {
+          method: 'POST',
+          credentials: 'include', // Sends authentication cookies
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {

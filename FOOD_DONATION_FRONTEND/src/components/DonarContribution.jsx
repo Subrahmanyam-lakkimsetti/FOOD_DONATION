@@ -9,10 +9,13 @@ const DonorDashboard = ({ User, handleLogout }) => {
   // ✅ Fetch Donated Food from Backend
   const fetchDonatedFood = async () => {
     try {
-      const response = await fetch('http://localhost:5000/donor/food', {
-        method: 'GET',
-        credentials: 'include',
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + '/donor/food',
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {

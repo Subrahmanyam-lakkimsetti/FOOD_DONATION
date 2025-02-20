@@ -55,3 +55,12 @@ button:hover {
   font-weight: bold;
   margin-bottom: 15px;
 }
+
+.donation-button {
+  background-color: gray;
+}
+
+.donation-button:hover {
+  background-color: grey;
+  cursor: none;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import './AvailableFoodList.css'; // External CSS
+import './AvailableFoodList.css';
 import NavBar from './nabar';
+
 const AvailableFoodList = ({ User, handleLogout }) => {
   const [foodItems, setFoodItems] = useState([]);
   const [message, setMessage] = useState('');
@@ -9,10 +10,11 @@ const AvailableFoodList = ({ User, handleLogout }) => {
     fetchAvailableFood();
   }, []);
 
-  // Fetch available food from backend
   const fetchAvailableFood = async () => {
     try {
-      const response = await fetch('http://localhost:5000/available');
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + '/available'
+      );
       const data = await response.json();
       setFoodItems(data);
     } catch (error) {
@@ -20,15 +22,17 @@ const AvailableFoodList = ({ User, handleLogout }) => {
     }
   };
 
-  // Handle "Receive" button click
   const handleReceive = async (foodId) => {
     try {
-      const response = await fetch(`http://localhost:5000/request/${foodId}`, {
-        method: 'PUT',
-        credentials: 'include', // Ensures auth cookies are sent
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'Requested' }), // Send only the necessary field
-      });
+      const response = await fetch(
+        import.meta.env.VITE_BACKEND_URL + `/${foodId}`,
+        {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'Requested' }),
+        }
+      );
 
       const data = await response.json();
       if (response.ok) {
@@ -68,7 +72,19 @@ const AvailableFoodList = ({ User, handleLogout }) => {
                 <p>
                   <strong>Phone:</strong> {food.donor?.phone || 'Not Available'}
                 </p>
-                <button onClick={() => handleReceive(food._id)}>Receive</button>
+
+                {/* Hide the "Receive" button if the logged-in user is the donor */}
+                {console.log(User.email, food.donor.email)}
+                {console.log(User.email !== food.donor.email)}
+                {User.email === food.donor?.email ? (
+                  <button onClick={() => handleReceive(food._id)}>
+                    Receive
+                  </button>
+                ) : (
+                  <>
+                    <button className="donation-button">your donation</button>
+                  </>
+                )}
               </li>
             ))}
           </ul>
