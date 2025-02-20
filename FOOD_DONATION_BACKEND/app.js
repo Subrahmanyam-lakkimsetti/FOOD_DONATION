@@ -10,11 +10,17 @@ const cookieParser = require('cookie-parser');
 const Food = require('./models/foodDonate');
 const cors = require('cors');
 const { sendEmailNotification } = require('./utils/emailHelper2');
+const bodyParser = require('body-parser');
+const axios = require('axios');
+const GEMINI_API_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+const AI_STUDIO_API_KEY = process.env.AI_STUDIO_API_KEY; // Load API key from .env
 
 const User = require('./models/userScheema');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+app.use(bodyParser.json());
 
 app.use(express.json());
 
@@ -238,6 +244,35 @@ app.get('/user/logout', (req, res) => {
     status: 'success',
     message: 'logout sucessfully',
   });
+});
+
+app.post('/chat', async (req, res) => {
+  const userMessage = req.body.message;
+
+  if (!userMessage) {
+    return res.status(400).json({ reply: 'Message cannot be empty.' });
+  }
+
+  try {
+    const response = await axios.post(
+      `${GEMINI_API_URL}?key=${AI_STUDIO_API_KEY}`,
+      {
+        contents: [{ parts: [{ text: userMessage }] }],
+      },
+      { headers: { 'Content-Type': 'application/json' } }
+    );
+
+    const botReply =
+      response.data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "Sorry, I couldn't generate a response.";
+    res.json({ reply: botReply });
+  } catch (error) {
+    console.error(
+      'Error calling AI Studio API:',
+      error.response?.data || error.message
+    );
+    res.status(500).json({ reply: 'AI service is currently unavailable.' });
+  }
 });
 
 app.use(cookieParser());

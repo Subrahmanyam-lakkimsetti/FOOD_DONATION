@@ -7,6 +7,7 @@ import cookie from 'js-cookie';
 import DonateFood from '../src/components/Donatefood';
 import AvailableFoodList from './components/AvailableFood';
 import DonorDashboard from './components/DonarContribution';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 const App = () => {
   const [User, setUser] = useState(() => {
     const isLoggedin = localStorage.getItem('isLoggedIn');

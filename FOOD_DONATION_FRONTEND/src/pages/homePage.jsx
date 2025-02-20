@@ -1,8 +1,12 @@
 import AvailableFoodList from '../components/AvailableFood';
+import Chatbot from '../components/Chatbot';
+import Footer from '../components/footer';
 
 import HowItWorks from '../components/howItWorks';
 import MainSection from '../components/mainSection';
 import NavBar from '../components/nabar';
+import SDGSection from '../components/SDGSection';
+import WhyDonate from '../components/WhyDonate';
 
 const HomePage = ({ User, handleLogout }) => {
   return (
@@ -10,7 +14,10 @@ const HomePage = ({ User, handleLogout }) => {
       <NavBar User={User} handleLogout={handleLogout} />
       <MainSection User={User} />
       <HowItWorks />
-      <h1>Hello</h1>
+      <SDGSection />
+      <WhyDonate />
+      <Footer />
+      <Chatbot />
     </>
   );
 };

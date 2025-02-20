@@ -11,10 +11,10 @@ const SendEmail = async (email, otp) => {
   });
 
   let message = {
-    from: `Movie reviewer platform <${process.env.GMAIL_ACCOUNT}>`,
+    from: `Food Bridge <${process.env.GMAIL_ACCOUNT}>`,
     to: email,
-    subject: 'Opt verification from CineRave',
-    html: `<p>Hello reviewer you login otp is : <span>${otp}</span></p>`,
+    subject: 'Opt verification from Food Bridge',
+    html: `<p>Hello, you login otp is : <span>${otp}</span></p>`,
   };
   const isEmailsent = await transporter.sendMail(message);
   return isEmailsent;
