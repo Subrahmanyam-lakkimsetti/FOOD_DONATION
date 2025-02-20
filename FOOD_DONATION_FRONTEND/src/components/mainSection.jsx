@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import './mainSection.css';
 const MainSection = () => {
   return (
@@ -9,8 +10,12 @@ const MainSection = () => {
             Connection food reducing waste, Feeding Hope, Sustainably
           </h1>
           <div className="buttons">
-            <button className="button">Donate</button>
-            <button className="button">Recieve</button>
+            <Link to="/donation">
+              <button className="button">Donate</button>
+            </Link>
+            <Link to="/request">
+              <button className="button">Recieve</button>
+            </Link>
           </div>
         </div>
       </div>

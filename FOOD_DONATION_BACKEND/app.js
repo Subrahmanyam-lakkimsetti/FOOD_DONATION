@@ -7,7 +7,9 @@ const OtpModel = require('./models/otpScheema');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const Food = require('./models/foodDonate');
 const cors = require('cors');
+const { sendEmailNotification } = require('./utils/emailHelper2');
 
 const User = require('./models/userScheema');
 
@@ -196,7 +198,7 @@ app.post('/users/login', async (req, res) => {
     const token = jwt.sign(
       {
         email,
-        _id,
+        id: _id,
         name,
       },
       process.env.JWT_SECRET_KEY,
@@ -240,33 +242,51 @@ app.get('/user/logout', (req, res) => {
 app.use(cookieParser());
 
 const authorizationMiddleWare = (req, res, next) => {
-  const { authorization } = req.cookies;
-  console.log('auth: ', authorization);
-  if (!authorization) {
-    return res.status(401).json({
+  try {
+    const token = req.cookies.authorization;
+    console.log('Auth Token:', token);
+
+    if (!token) {
+      return res.status(401).json({
+        status: 'fail',
+        message: 'Unauthorized: No token provided',
+      });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decodedToken) => {
+      if (error) {
+        console.log('JWT Verification Error:', error.message);
+        return res.status(401).json({
+          status: 'fail',
+          message: 'Authorization failed: Invalid token',
+        });
+      }
+
+      console.log('Decoded Token:', decodedToken); // Debug log
+      if (!decodedToken.email || !decodedToken.id) {
+        console.log('JWT payload does not contain user ID or email');
+        return res.status(400).json({
+          status: 'fail',
+          message: 'Invalid token structure',
+        });
+      }
+
+      req.user = decodedToken; // Correctly attach user data
+      console.log('User attached to req:', req.user);
+      next();
+    });
+  } catch (error) {
+    console.error('Middleware Error:', error.message);
+    res.status(500).json({
       status: 'fail',
-      message: 'unauthorized',
+      message: 'Internal server error',
     });
   }
-
-  jwt.verify(authorization, process.env.JWT_SECRET_KEY, (error, data) => {
-    if (error) {
-      console.log(error.message);
-      res.status(401).json({
-        status: 'fail',
-        message: 'authrozation failed',
-      });
-    } else {
-      console.log(data);
-      req.User = data;
-      next();
-    }
-  });
 };
 
 app.get('/users/me', authorizationMiddleWare, (req, res) => {
   try {
-    const { email, name } = req.User;
+    const { email, name } = req.user;
     res.status(200).json({
       status: 'success',
       data: {
@@ -278,6 +298,121 @@ app.get('/users/me', authorizationMiddleWare, (req, res) => {
     console.log(error.message);
   }
 });
+
+app.post('/donate', authorizationMiddleWare, async (req, res) => {
+  try {
+    const {
+      foodName,
+      quantity,
+      location,
+      foodType,
+      expiryDate,
+      description,
+      donorContact,
+      donorEmail,
+    } = req.body;
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: 'Unauthorized: User ID missing' });
+    }
+
+    if (
+      !foodName ||
+      !quantity ||
+      !location ||
+      !foodType ||
+      !expiryDate ||
+      !donorContact ||
+      !donorEmail
+    ) {
+      return res
+        .status(400)
+        .json({ message: 'All required fields must be provided' });
+    }
+
+    const newFood = new Food({
+      donor: req.user.id,
+      donorContact,
+      donorEmail,
+      foodName,
+      quantity,
+      foodType,
+      expiryDate,
+      description,
+      location,
+    });
+
+    await newFood.save();
+
+    res
+      .status(201)
+      .json({ message: 'Food donation successful', food: newFood });
+  } catch (error) {
+    console.error('Error:', error.message);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+app.get('/available', async (req, res) => {
+  try {
+    const availableFood = await Food.find({ status: 'Available' }).populate(
+      'donor',
+      'name address phone'
+    );
+    res.status(200).json(availableFood);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/request/:foodId', authorizationMiddleWare, async (req, res) => {
+  try {
+    const updatedFood = await Food.findByIdAndUpdate(
+      req.params.foodId,
+      { status: 'Requested' }, // Update only the status field
+      { new: true, runValidators: false } // Prevent validation errors
+    );
+
+    if (!updatedFood) {
+      return res.status(404).json({ message: 'Food not found' });
+    }
+
+    // Send email to the receiver
+
+    if (typeof sendEmailNotification !== 'function') {
+      console.error('sendEmailNotification is not recognized as a function!');
+    } else {
+      console.log('sendEmailNotification is a valid function');
+    }
+
+    console.log(sendEmailNotification);
+    await sendEmailNotification(updatedFood);
+
+    res.json({
+      message: 'Food request successful. A confirmation email has been sent.',
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+/** 4. Mark Food as Picked Up (PUT) **/
+app.put('/pickup/:foodId', authorizationMiddleWare, async (req, res) => {
+  try {
+    const food = await Food.findById(req.params.foodId);
+    if (!food || food.status !== 'Requested')
+      return res.status(400).json({ message: 'Invalid food request' });
+
+    food.status = 'Picked Up';
+    await food.save();
+
+    res.json({ message: 'Food picked up successfully', food });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

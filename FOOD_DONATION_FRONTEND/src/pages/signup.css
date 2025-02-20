@@ -17,13 +17,11 @@
 }
 
 .login-heading {
-  /* text-align: center; */
   font-size: 1.8rem;
   margin-bottom: 1rem;
   color: #333;
 }
 
-/* Form Styles */
 .form-details-login {
   display: flex;
   flex-direction: column;
@@ -75,7 +73,6 @@ select.input-details {
   margin-top: 0.5rem;
 }
 
-/* Responsive Design */
 @media (max-width: 500px) {
   .login-form {
     width: 90%;

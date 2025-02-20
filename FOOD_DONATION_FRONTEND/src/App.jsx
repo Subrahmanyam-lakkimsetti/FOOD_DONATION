@@ -4,6 +4,8 @@ import Login from './pages/login';
 import Signup from './pages/signup';
 import { useEffect, useState } from 'react';
 import cookie from 'js-cookie';
+import DonateFood from '../src/components/Donatefood';
+import AvailableFoodList from './components/AvailableFood';
 const App = () => {
   const [User, setUser] = useState(() => {
     const isLoggedin = localStorage.getItem('isLoggedIn');
@@ -134,6 +136,16 @@ const App = () => {
               ) : (
                 <Signup User={User} handleLogout={handleLogout} />
               )
+            }
+          />
+          <Route
+            path="/donation"
+            element={<DonateFood User={User} handleLogout={handleLogout} />}
+          />
+          <Route
+            path="request"
+            element={
+              <AvailableFoodList User={User} handleLogout={handleLogout} />
             }
           />
         </Routes>
