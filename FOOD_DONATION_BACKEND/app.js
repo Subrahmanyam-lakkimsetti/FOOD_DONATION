@@ -14,8 +14,7 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
-const AI_STUDIO_API_KEY = process.env.AI_STUDIO_API_KEY; // Load API key from .env
-
+const AI_STUDIO_API_KEY = process.env.AI_STUDIO_API_KEY; 
 const User = require('./models/userScheema');
 
 const app = express();
