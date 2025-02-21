@@ -4,7 +4,7 @@ const MainSection = ({ User }) => {
   return (
     <>
       <div className="main">
-        <img src="../src/assets/main-image.jpg" className="background-image" />
+        <img src="/main-image.jpg" className="background-image" />
         <div className="main-details">
           {User.isLoggedin ? (
             <h1 className="text">Welcome {User.name}!</h1>
