@@ -76,7 +76,7 @@ const AvailableFoodList = ({ User, handleLogout }) => {
                 {/* Hide the "Receive" button if the logged-in user is the donor */}
                 {console.log(User.email, food.donor.email)}
                 {console.log(User.email !== food.donor.email)}
-                {User.email === food.donor?.email ? (
+                {User.email !== food.donor?.email ? (
                   <button onClick={() => handleReceive(food._id)}>
                     Receive
                   </button>
