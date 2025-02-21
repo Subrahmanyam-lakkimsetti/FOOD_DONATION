@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaRobot } from 'react-icons/fa'; // Robot icon
 import { FiX } from 'react-icons/fi'; // Close icon
-import './Chatbot.css';
+import './chatbot.css';
 import axios from 'axios';
 
 const Chatbot = () => {
